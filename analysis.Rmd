@@ -1,0 +1,70 @@
+---
+title: "Project 3--revised"
+author: "Weiran Zeng"
+date: "2024-11-11"
+output: html_document
+---
+In this project, I revisit the regression model developed in Project 2 using the Ames housing dataset. The primary aim is to assess whether the model satisfies the key assumptions of linear regression, including linearity, normality of residuals, and homoscedasticity. If any of these assumptions are found to be violated, I will apply a log transformation to the response variable, SalePrice, to improve model fit and assumption satisfaction. Finally, I will compare the performance of the original and transformed models to determine which provides a better, more reliable prediction of housing prices.
+
+# Original Model
+```{r original_model, echo=FALSE}
+library(readr)
+library(ggplot2)
+
+ames_data <- read_csv("MAT 215/HW/Project2/ames.csv")
+model <- lm(SalePrice ~ Gr.Liv.Area, data = ames_data)
+original_summary <- summary(model)
+original_summary
+```
+
+# Diagnostic Plots for Original Model
+```{r diagnostics_original, echo=FALSE}
+par(mfrow = c(2, 2))
+plot(model)
+```
+Residuals vs. Fitted: Check for random scatter. Patterns or curves may suggest issues with linearity.
+Q-Q Plot: Points should follow the diagonal line to indicate normality. Deviations suggest non-normality.
+Scale-Location Plot: Consistent spread suggests homoscedasticity. A fan shape suggests heteroscedasticity.
+Residuals vs. Leverage: Look for influential points that may impact the model disproportionately.
+# log-transformed SalePrice
+
+```{r modified_model, echo=FALSE}
+log_model <- lm(log(SalePrice) ~ Gr.Liv.Area, data = ames_data)
+log_summary <- summary(log_model)
+log_summary
+```
+
+Residuals vs. Fitted: Evaluate scatter to check for improvements in linearity and homoscedasticity.
+Q-Q Plot: Check if the log transformation has improved the alignment with the diagonal, indicating better normality.
+Scale-Location Plot: Assess for a more consistent spread, suggesting improved homoscedasticity.
+Residuals vs. Leverage: Verify any remaining influential points.
+
+# Model Comparison
+R-squared: The original model has an R-squared of `r original_summary$r.squared`, and the log-transformed model has an R-squared of `r log_summary$r.squared`. Although the R-squared for the log model is on a transformed scale, it still provides an indication of the model’s explanatory power.
+Residual Standard Error: A lower residual standard error in the log model suggests improved fit on the transformed scale.
+
+
+# Diagnostic Plots for Transformed Model
+```{r diagnostics_log_model, echo=FALSE}
+par(mfrow = c(2, 2))
+plot(log_model)
+```
+Residuals vs. Fitted: Check for random scatter to confirm linearity and homoscedasticity.
+Q-Q Plot: Points should be close to the diagonal line to confirm normality of residuals.
+Scale-Location Plot: A consistent spread suggests improved homoscedasticity.
+Residuals vs. Leverage: Identify any influential points that may still impact the model.
+
+
+```{r prediction, echo=FALSE}
+new_data <- data.frame(Gr.Liv.Area = 2000)
+predicted_price <- predict(log_model, newdata = new_data, interval = "prediction")
+exp(predicted_price)  
+```
+
+The table above shows the predicted sale price for a house with a `Gr.Liv.Area` of 2000 square feet. The 95% prediction interval provides an estimate of the range within which the true sale price is likely to fall, indicating the precision of the prediction.
+
+
+#Conclusion
+In this project, I evaluated two linear regression models using the Ames housing dataset: one with SalePrice as the response variable and another with log(SalePrice). Diagnostic plots for the original model indicated some potential violations of linear regression assumptions, such as normality and homoscedasticity. After applying a log transformation, the transformed model showed improved assumption satisfaction, particularly in terms of residual normality and variance consistency.
+
+The comparison of R-squared values and residual standard errors suggests that while the log-transformed model operates on a different scale, it provides a more reliable fit with assumptions better met. Therefore, the log-transformed model is preferred for predicting housing prices in this dataset due to its enhanced validity and precision.
